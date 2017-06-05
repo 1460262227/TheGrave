@@ -81,6 +81,9 @@
     <Compile Include="Assets\Scripts\AI\StateMachine.cs" />
     <Compile Include="Assets\Scripts\AI\StateMachineManager.cs" />
     <Compile Include="Assets\Scripts\AI\StateTransition.cs" />
+    <Compile Include="Assets\Scripts\AStar\PathNode.cs" />
+    <Compile Include="Assets\Scripts\AStar\PriorityQueue.cs" />
+    <Compile Include="Assets\Scripts\AStar\SpatialAStar.cs" />
     <Compile Include="Assets\Scripts\Block.cs" />
     <Compile Include="Assets\Scripts\Diamond.cs" />
     <Compile Include="Assets\Scripts\Ground.cs" />
