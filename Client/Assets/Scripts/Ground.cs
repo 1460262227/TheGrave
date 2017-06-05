@@ -6,6 +6,7 @@ public class Ground : MonoBehaviour
 {
     public Block BlockTemplate = null;
     public Vector2 BlockSize = new Vector2(1, 1);
+    public Triggers Triggers = null;
 
     Block[,] blocks = null;
     List<Block> allocated = new List<Block>();
@@ -21,6 +22,12 @@ public class Ground : MonoBehaviour
         bx = (int)(bp.x / BlockSize.x);
         by = (int)(bp.y / BlockSize.y);
         return bx >= 0 && bx < w && by >= 0 && by < h;
+    }
+
+    public Vector3 ToWorldPos(int bx, int by)
+    {
+        var wp = new Vector3(BlockSize.x * bx, BlockSize.y * by, 0) - offset;
+        return wp;
     }
 
     public int[] Selected
@@ -52,6 +59,8 @@ public class Ground : MonoBehaviour
             var x = selected[n * 2];
             var y = selected[n * 2 + 1];
             blocks[x, y].Layer++;
+
+            Triggers.Uncover(blocks[x, y].Layer - 1, x, y);
         });
 
         Selected = null;
@@ -109,7 +118,7 @@ public class Ground : MonoBehaviour
             b.gameObject.SetActive(true);
             b.Layer = 0;
             b.transform.SetParent(transform, false);
-            b.transform.position = new Vector3(BlockSize.x * x, BlockSize.y * y, 0) - offset;
+            b.transform.localPosition = ToWorldPos(x, y);
             blocks[x, y] = b;
         });
     }

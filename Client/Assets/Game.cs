@@ -6,10 +6,14 @@ public class Game : MonoBehaviour {
 
     public Ground Ground = null;
     public OpShape OpShape = null;
+    public Triggers Triggers = null;
 
-	// Use this for initialization
-	void Start () {
-        Ground.ReCreateGound(10, 10);
+    // Use this for initialization
+    void Start () {
+        int w = 10;
+        int h = 10;
+        Ground.ReCreateGound(w, h);
+        Triggers.ReCreateTriggers(2, w, h);
         OpShape.GenNextShape();
     }
 	

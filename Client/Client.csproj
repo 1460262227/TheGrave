@@ -76,10 +76,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Game.cs" />
+    <Compile Include="Assets\Scripts\AI\ActorAI.cs" />
+    <Compile Include="Assets\Scripts\AI\State.cs" />
+    <Compile Include="Assets\Scripts\AI\StateMachine.cs" />
+    <Compile Include="Assets\Scripts\AI\StateMachineManager.cs" />
+    <Compile Include="Assets\Scripts\AI\StateTransition.cs" />
     <Compile Include="Assets\Scripts\Block.cs" />
+    <Compile Include="Assets\Scripts\Diamond.cs" />
     <Compile Include="Assets\Scripts\Ground.cs" />
     <Compile Include="Assets\Scripts\HandleClickOnBlock.cs" />
+    <Compile Include="Assets\Scripts\Monster.cs" />
     <Compile Include="Assets\Scripts\OpShape.cs" />
+    <Compile Include="Assets\Scripts\Triggers.cs" />
     <Compile Include="Assets\Scripts\Utils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

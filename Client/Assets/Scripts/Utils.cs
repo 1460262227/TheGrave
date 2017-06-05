@@ -56,6 +56,11 @@ public static class Utils{
         return rand.Next(min, max);
     }
 
+    public static bool Hit(float rate)
+    {
+        return RandNext(0, int.MaxValue) / (float)(int.MaxValue - 1) < rate;
+    }
+
     public static T Clamp<T>(T v, T min, T max) where T: IComparable
     {
         if (v.CompareTo(min) < 0)
