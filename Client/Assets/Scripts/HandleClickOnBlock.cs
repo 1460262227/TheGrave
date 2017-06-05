@@ -5,17 +5,43 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class HandleClickOnBlock : MonoBehaviour, IPointerClickHandler {
+public class HandleClickOnBlock : MonoBehaviour {
 
-    public Ground ScreenPos2BlockPos = null;
+    public Ground Ground = null;
     public Action<int, int> OnClickGorund = null;
+    public OpShape OpShape = null;
 
     public void OnPointerClick(PointerEventData eventData)
     {
         int bx;
         int by;
         var pt = eventData.position;
-        if (ScreenPos2BlockPos.ToBlockPos(pt.x, pt.y, out bx, out by))
+        if (Ground.ToBlockPos(pt.x, pt.y, out bx, out by))
             OnClickGorund.SC(bx, by);
+    }
+
+    private void Start()
+    {
+        OpShape.OnDragging += (sx, sy, xys) =>
+        {
+            int bx;
+            int by;
+            Ground.ToBlockPos(sx, sy, out bx, out by);
+            Utils.For(xys.Length / 2, (n) =>
+            {
+                var x = xys[n * 2] + bx;
+                var y = xys[n * 2 + 1] + by;
+                xys[n * 2] = x;
+                xys[n * 2 + 1] = y;
+            });
+
+            if (!Ground.Valid(xys))
+                return;
+
+            Ground.Selected = xys;
+        };
+
+        OpShape.OnEndDrag += Ground.FillSelected;
+        OpShape.OnEndDrag += OpShape.GenNextShape;
     }
 }

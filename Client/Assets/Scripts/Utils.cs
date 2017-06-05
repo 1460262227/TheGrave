@@ -44,9 +44,25 @@ public static class Utils{
             call(p1, p2);
     }
 
+    public static void SC<T1, T2, T3>(this Action<T1, T2, T3> call, T1 p1, T2 p2, T3 p3)
+    {
+        if (call != null)
+            call(p1, p2, p3);
+    }
+
     static System.Random rand = new System.Random();
     public static int RandNext(int min, int max)
     {
         return rand.Next(min, max);
+    }
+
+    public static T Clamp<T>(T v, T min, T max) where T: IComparable
+    {
+        if (v.CompareTo(min) < 0)
+            return min;
+        else if (v.CompareTo(max) >= 0)
+            return max;
+        else
+            return v;
     }
 }

@@ -10,7 +10,11 @@ public class Block : MonoBehaviour {
     public int Layer
     {
         get { return layer; }
-        set { layer = value; RefreshLayersVisible(); }
+        set
+        {
+            layer = Utils.Clamp(value, 0, Layers.Length - 1);
+            RefreshLayersVisible();
+        }
     } int layer = 0;
 
     void RefreshLayersVisible()

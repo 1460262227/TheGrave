@@ -9,7 +9,7 @@ public class Game : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        Ground.ReCreateGound(13, 13);
+        Ground.ReCreateGound(10, 10);
         OpShape.GenNextShape();
     }
 	

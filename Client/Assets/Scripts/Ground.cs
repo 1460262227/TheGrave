@@ -28,8 +28,33 @@ public class Ground : MonoBehaviour
         set
         {
             ClearSelected();
-            Utils.For(value.Length / 2, (n) => { blocks[n * 2, n * 2 + 1].Selected = true; });
+            selected = value;
+
+            if (selected == null)
+                return;
+
+            Utils.For(value.Length / 2, (n) =>
+            {
+                var x = selected[n * 2];
+                var y = selected[n * 2 + 1];
+                blocks[x, y].Selected = true;
+            });
         }
+    } int[] selected = null;
+
+    public void FillSelected()
+    {
+        if (selected == null)
+            return;
+
+        Utils.For(selected.Length / 2, (n) =>
+        {
+            var x = selected[n * 2];
+            var y = selected[n * 2 + 1];
+            blocks[x, y].Layer++;
+        });
+
+        Selected = null;
     }
 
     public bool Valid(int[] pts)
@@ -41,6 +66,12 @@ public class Ground : MonoBehaviour
             var x = pts[n * 2];
             var y = pts[n * 2 + 1];
             if (x < 0 || x >= w || y < 0 || y >= h)
+            {
+                valid = false;
+                return;
+            }
+
+            if (blocks[x, y].Layer == blocks[x, y].Layers.Length - 1)
             {
                 valid = false;
                 return;

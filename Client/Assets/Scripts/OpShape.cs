@@ -1,9 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
-public class OpShape : MonoBehaviour {
+public class OpShape : MonoBehaviour, IDragHandler, IEndDragHandler {
 
+    public Action<int, int, int[]> OnDragging = null;
+    public Action OnEndDrag = null;
     public GameObject[] ShapeBlocks = null;
 
     private void Awake()
@@ -61,16 +66,35 @@ public class OpShape : MonoBehaviour {
                         xys.Add(y);
                     }
                 });
-
-                Debug.Assert(xys.Count == 8);
+                
                 Shapes[n][m] = xys.ToArray();
             });
         });
     }
 
+    void IDragHandler.OnDrag(PointerEventData eventData)
+    {
+        var xys = Shapes[n][m].Clone() as int[];
+        var pt = eventData.position;
+        OnDragging.SC((int)pt.x, (int)pt.y, xys);
+    }
+
+    void IEndDragHandler.OnEndDrag(PointerEventData eventData)
+    {
+        OnEndDrag.SC();
+    }
+
     int[][][] Shapes = null;
     string[][] ShapesStr = new string[][]
     {
+        new string[]
+        {
+            "    ",
+            " *  ",
+            "    ",
+            "    ",
+        },
+
         new string[]
         {
             "    ",
