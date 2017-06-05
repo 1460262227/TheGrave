@@ -1,129 +1,147 @@
 ﻿using System;
 using System.Collections.Generic;
+using AStar;
 
 namespace Nova
 {
     public static class AIExt
     {
         public static StateMachineManager SMMgr = null;
+        public static AStarPathFinder PathFinder = null;
+        public static Ground Ground = null;
 
         public static StateMachine CreateAI(string name, string aiType)
         {
             return null;
         }
 
+        static Actor[] GetActorsInRange(this Actor a, int range)
+        {
+            return null;
+        }
+
+        static void Move2(this Actor a, int x, int y)
+        {
+
+        }
+
+        static void Attack(this Actor a, Actor target)
+        {
+
+        }
+
+        static List<Pos> FindPath(this Actor a, Pos dst)
+        {
+            return null;
+        }
+
         #region 各种独立行为
 
-        //// 原地待命，什么都不干
-        //static Action<int> Idle(this Actor a)
-        //{
-        //    return null;
-        //}
+        // 原地待命，什么都不干
+        static Action<int> Idle(this Actor a)
+        {
+            return null;
+        }
 
-        //// 沿着给定路径移动
-        //static Action<float> MakeMoveOnPath(this Actor a, List<Pos> path, float speed, Action<Actor> targetCb = null)
-        //{
-        //    var t = 0f; // 累计结余时间
-        //    var interval = 1 / speed; // 每走一各的时间间隔
+        // 沿着给定路径移动
+        static Action<float> MakeMoveOnPath(this Actor a, List<Pos> path, float speed)
+        {
+            var t = 0f; // 累计结余时间
+            var interval = 1 / speed; // 每走一各的时间间隔
 
-        //    return (te) =>
-        //    {
-        //        // 行动间隔时间
-        //        t += te;
-        //        if (t < interval)
-        //            return;
+            return (te) =>
+            {
+                // 行动间隔时间
+                t += te;
+                if (t < interval)
+                    return;
 
-        //        t -= interval;
+                t -= interval;
 
-        //        // 同时搜索攻击目标
-        //        if (targetCb != null)
-        //        {
-        //            var actors = a.Map.GetActorsInRange(a, a.SightRange, true);
-        //            var target = actors.Find(tar => (tar.GetNpcFavor(a.TID) < 0));
-        //            if (target != null && !target.IsDead())
-        //                targetCb(target);
-        //        }
+                // 路径走完了
+                if (path.Count == 0)
+                    return;
 
-        //        // 路径走完了
-        //        if (path.Count == 0)
-        //            return;
+                // 移动一格
+                var nextPos = path[0];
+                path.RemoveAt(0);
+                a.Move2(nextPos.x, nextPos.y);
+            };
+        }
 
-        //        // 移动一格
-        //        var nextPos = path[0];
-        //        path.RemoveAt(0);
-        //        MoveActor(a, nextPos.x, nextPos.y);
-        //    };
-        //}
+        // 搜索攻击目标
+        static Action<float> MakeFindingTarget(this Actor a, Action<Actor> cbTarget)
+        {
+            return (te) =>
+            {
+                var actors = a.GetActorsInRange(a.SightRange);
+                foreach (var tar in actors)
+                {
+                    // 检查攻击距离
+                    if (tar != null)
+                    {
+                        cbTarget(tar);
+                        return;
+                    }
+                }
+            };
+        }
 
-        //// 搜索攻击目标
-        //static Action<float> MakeFindingTarget(this Actor a, Action<Actor> cbTarget)
-        //{
-        //    return (te) =>
-        //    {
-        //        var actors = a.Map.GetActorsInRange(a, a.SightRange, true);
-        //        var target = actors.Find(t => (t.GetNpcFavor(a.TID) < 0));
+        // 以一定时间间隔攻击目标
+        static Action<float> MakeAttack(this Actor a, Func<Actor> getTarget, float attackInterval)
+        {
+            float t = 0;
 
-        //        // 检查攻击距离
-        //        if (target != null && a.IsInRange(target, 1) && !target.IsDead())
-        //            cbTarget(target);
-        //    };
-        //}
+            return (te) =>
+            {
+                t += te;
 
-        //// 以一定时间间隔攻击目标
-        //static Action<float> MakeAttack(this Actor a, Func<Actor> getTarget, float attackInterval)
-        //{
-        //    float t = 0;
+                // 检查攻击间隔
+                if (t < attackInterval)
+                    return;
 
-        //    return (te) =>
-        //    {
-        //        t += te;
+                t -= attackInterval;
 
-        //        // 检查攻击间隔
-        //        if (t < attackInterval)
-        //            return;
+                // 检查攻击目标
+                var target = getTarget();
+                if (target == null)
+                    return;
 
-        //        t -= attackInterval;
+                // 检查攻击距离和目标存活状态
+                if (!a.InAttackRange(target))
+                    return;
 
-        //        // 检查攻击目标
-        //        var target = getTarget();
-        //        if (target == null)
-        //            return;
+                // 攻击
+                a.Attack(target);
+            };
+        }
 
-        //        // 检查攻击距离和目标存活状态
-        //        if (!a.IsInRange(target, 1) || target.IsDead())
-        //            return;
+        // 追赶目标
+        static Action<float> MakeChasing(this Actor a, Func<Actor> getTarget, float speed)
+        {
+            var t = 0f; // 累计结余时间
+            var interval = 1 / speed; // 每走一各的时间间隔
 
-        //        // 攻击
-        //        AttackActor(a, target, 1001);
-        //    };
-        //}
+            return (te) =>
+            {
+                // 行动间隔时间
+                t += te;
+                if (t < interval)
+                    return;
 
-        //// 追赶目标
-        //static Action<float> MakeChasing(this Actor a, Func<Actor> getTarget, float speed)
-        //{
-        //    var t = 0f; // 累计结余时间
-        //    var interval = 1 / speed; // 每走一各的时间间隔
+                t -= interval;
 
-        //    return (te) =>
-        //    {
-        //        // 行动间隔时间
-        //        t += te;
-        //        if (t < interval)
-        //            return;
+                // 寻路
+                var target = getTarget();
+                var path = a.FindPath(target.Pos);
+                if (path.Count < 2) // 第一格是自己现在位置
+                    return;
 
-        //        t -= interval;
-
-        //        // 寻路
-        //        var target = getTarget();
-        //        var path = a.FindPath(target.Pos);
-        //        if (path.Count < 2) // 第一格是自己现在位置
-        //            return;
-
-        //        // 移动一格
-        //        var nextPos = path[1];
-        //        MoveActor(a, nextPos.x, nextPos.y);
-        //    };
-        //}
+                // 移动一格
+                var nextPos = path[1];
+                a.Move2(nextPos.x, nextPos.y);
+            };
+        }
 
         #endregion
 

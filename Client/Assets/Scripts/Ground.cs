@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using AStar;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,12 +8,15 @@ public class Ground : MonoBehaviour
     public Block BlockTemplate = null;
     public Vector2 BlockSize = new Vector2(1, 1);
     public Triggers Triggers = null;
+    public Player Player = null;
 
     Block[,] blocks = null;
     List<Block> allocated = new List<Block>();
     int w;
     int h;
     Vector3 offset = Vector3.zero;
+
+    AStarPathFinder pathFinder = new AStarPathFinder();
 
     public bool ToBlockPos(float sx, float sy, out int bx, out int by)
     {
@@ -49,10 +53,10 @@ public class Ground : MonoBehaviour
         }
     } int[] selected = null;
 
-    public void FillSelected()
+    public bool FillSelected()
     {
         if (selected == null)
-            return;
+            return false;
 
         Utils.For(selected.Length / 2, (n) =>
         {
@@ -61,9 +65,11 @@ public class Ground : MonoBehaviour
             blocks[x, y].Layer++;
 
             Triggers.Uncover(blocks[x, y].Layer - 1, x, y);
+            pathFinder.SetHeight(x, y, -blocks[x, y].Layer);
         });
 
         Selected = null;
+        return true;
     }
 
     public bool Valid(int[] pts)
@@ -121,6 +127,10 @@ public class Ground : MonoBehaviour
             b.transform.localPosition = ToWorldPos(x, y);
             blocks[x, y] = b;
         });
+
+        pathFinder.ResetMapData(new int[w * h], w, h);
+
+        Player.transform.localPosition = ToWorldPos(0, 0);
     }
 
     void DestroyAll()

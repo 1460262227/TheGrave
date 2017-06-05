@@ -54,7 +54,7 @@ namespace AStar
         }
     }
 
-    // A* 寻路器，js 友好
+    // A* 寻路器
     public class AStarPathFinder : IConnectionCheck
     {
         public bool Connected(int fx, int fy, int tx, int ty)

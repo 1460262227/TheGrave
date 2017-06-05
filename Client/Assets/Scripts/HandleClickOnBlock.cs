@@ -41,7 +41,10 @@ public class HandleClickOnBlock : MonoBehaviour {
             Ground.Selected = xys;
         };
 
-        OpShape.OnEndDrag += Ground.FillSelected;
-        OpShape.OnEndDrag += OpShape.GenNextShape;
+        OpShape.OnEndDrag += () =>
+        {
+            if (Ground.FillSelected())
+                OpShape.GenNextShape();
+        };
     }
 }

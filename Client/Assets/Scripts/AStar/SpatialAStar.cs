@@ -131,7 +131,7 @@ namespace AStar
             return Math.Abs(inStart.X - inEnd.X) + Math.Abs(inStart.Y - inEnd.Y);
         }
 
-        private static readonly Double SQRT_2 = Math.Sqrt(2);
+        // private static readonly Double SQRT_2 = Math.Sqrt(2);
 
         protected virtual Double NeighborDistance(PathNode inStart, PathNode inEnd)
         {
@@ -306,7 +306,7 @@ namespace AStar
             int x = inAround.X;
             int y = inAround.Y;
 
-            Type t = inUserContext.GetType();
+            // Type t = inUserContext.GetType();
 
             // left
             if (x > 0 && inAround.Connected(inUserContext, x - 1, y))
