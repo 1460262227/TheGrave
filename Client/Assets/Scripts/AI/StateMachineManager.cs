@@ -10,10 +10,10 @@ namespace Nova
         // 所有状态机
         Dictionary<string, StateMachine> sms = new Dictionary<string, StateMachine>();
 
-        public void OnTimeElapsed(int te)
+        public void OnTimeElapsed(float te)
         {
             foreach (var sm in sms.Values)
-                sm.Run(te / 1000.0f);
+                sm.Run(te);
         }
 
         // 获取已有状态机

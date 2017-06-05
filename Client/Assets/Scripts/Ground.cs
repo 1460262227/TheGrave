@@ -1,4 +1,5 @@
 ﻿using AStar;
+using Nova;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,6 +17,7 @@ public class Ground : MonoBehaviour
     int h;
     Vector3 offset = Vector3.zero;
 
+    public AStarPathFinder PathFinder { get { return pathFinder; } }
     AStarPathFinder pathFinder = new AStarPathFinder();
 
     public bool ToBlockPos(float sx, float sy, out int bx, out int by)
@@ -23,8 +25,8 @@ public class Ground : MonoBehaviour
         var cam = Camera.main;
         var wp = cam.ScreenToWorldPoint(new Vector3(sx, sy, 0));
         var bp = new Vector3(wp.x, wp.y, 0) + offset;
-        bx = (int)(bp.x / BlockSize.x);
-        by = (int)(bp.y / BlockSize.y);
+        bx = (int)(bp.x / BlockSize.x + 0.5f);
+        by = (int)(bp.y / BlockSize.y + 0.5f);
         return bx >= 0 && bx < w && by >= 0 && by < h;
     }
 
@@ -130,7 +132,7 @@ public class Ground : MonoBehaviour
 
         pathFinder.ResetMapData(new int[w * h], w, h);
 
-        Player.transform.localPosition = ToWorldPos(0, 0);
+        Player.Move2(0, 0);
     }
 
     void DestroyAll()

@@ -15,24 +15,39 @@ namespace Nova
             return null;
         }
 
-        static Actor[] GetActorsInRange(this Actor a, int range)
+        public static Actor[] GetActorsInRange(this Actor a, int range)
         {
             return null;
         }
 
-        static void Move2(this Actor a, int x, int y)
+        public static void Move2(this Actor a, int x, int y)
+        {
+            a.Pos = new Pos(x, y);
+            a.transform.localPosition = Ground.ToWorldPos(0, 0);
+        }
+
+        public static void MoveOnPath(this Actor a, List<Pos> path)
         {
 
         }
 
-        static void Attack(this Actor a, Actor target)
+        public static void Attack(this Actor a, Actor target)
         {
 
         }
 
-        static List<Pos> FindPath(this Actor a, Pos dst)
+        public static List<Pos> FindPath(this Actor a, Pos dst)
         {
-            return null;
+            var path = new List<Pos>();
+            var pts = PathFinder.FindPath(a.Pos.x, a.Pos.y, dst.x, dst.y);
+            Utils.For(pts.Length / 2, (n) =>
+            {
+                var x = pts[n * 2];
+                var y = pts[n * 2 + 1];
+                path.Add(new Pos(x, y));
+            });
+
+            return path;
         }
 
         #region 各种独立行为

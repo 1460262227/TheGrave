@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using Nova;
 
-public class HandleClickOnBlock : MonoBehaviour {
+public class HandleClickOnBlock : MonoBehaviour, IPointerClickHandler {
 
     public Ground Ground = null;
-    public Action<int, int> OnClickGorund = null;
     public OpShape OpShape = null;
+    public Player Player = null;
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -17,7 +18,15 @@ public class HandleClickOnBlock : MonoBehaviour {
         int by;
         var pt = eventData.position;
         if (Ground.ToBlockPos(pt.x, pt.y, out bx, out by))
-            OnClickGorund.SC(bx, by);
+        {
+            var path = Player.FindPath(new Pos(bx, by));
+            if (path.Count == 0)
+                return;
+
+            Player.MoveOnPath(path);
+        }
+
+        Debug.Log(Player.Pos.x + ", " + Player.Pos.y + " => " + bx + ", " + by);
     }
 
     private void Start()
