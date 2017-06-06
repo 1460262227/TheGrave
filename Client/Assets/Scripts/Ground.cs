@@ -30,7 +30,7 @@ public class Ground : MonoBehaviour
         return bx >= 0 && bx < w && by >= 0 && by < h;
     }
 
-    public Vector3 ToWorldPos(int bx, int by)
+    public Vector3 ToWorldPos(float bx, float by)
     {
         var wp = new Vector3(BlockSize.x * bx, BlockSize.y * by, 0) - offset;
         return wp;

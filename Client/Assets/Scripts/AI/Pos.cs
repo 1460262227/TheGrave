@@ -54,5 +54,13 @@ namespace Nova
             var dy = y - to.y;
             return (float)Math.Sqrt(dx * dx + dy * dy);
         }
+
+        public float Length
+        {
+            get
+            {
+                return (float)Math.Sqrt(x * x + y * y);
+            }
+        }
     }
 }

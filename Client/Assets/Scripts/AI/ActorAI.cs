@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AStar;
+using UnityEngine;
 
 namespace Nova
 {
@@ -26,14 +27,16 @@ namespace Nova
             return new Actor[0];
         }
 
-        public static void Move2(this Actor a, int x, int y)
+        public static void Move2(this Actor a, float fx, float fy)
         {
-            a.Pos = new Pos(x, y);
-            a.transform.localPosition = Ground.ToWorldPos(x, y);
+            a.transform.localPosition = Ground.ToWorldPos(fx, fy);
         }
 
         public static void MoveOnPath(this Actor a, List<Pos> path)
         {
+            if (a.MovePath != null && a.MovePath.Count > 0)
+                path.Insert(0, a.MovePath[0]);
+
             a.MovePath = path;
         }
 
@@ -73,26 +76,34 @@ namespace Nova
         static Action<float> MakeMoveOnPath(this Actor a, float speed)
         {
             var interval = 1 / speed; // 每走一各的时间间隔
-            var t = interval; // 累计结余时间
+            var t = 0f; // 累计结余时间
 
             return (te) =>
             {
                 // 行动间隔时间
                 t += te;
-                if (t < interval)
-                    return;
-
-                t -= interval;
 
                 // 路径走完了
                 var path = a.MovePath;
                 if (path == null || path.Count == 0)
                     return;
 
-                // 移动一格
-                var nextPos = path[0];
-                path.RemoveAt(0);
-                a.Move2(nextPos.x, nextPos.y);
+                var div = t / interval;
+                if (div < 1)
+                {
+                    var dp = path[0] - a.Pos;
+                    var v2 = new Vector2(dp.x, dp.y);
+                    var pt = v2 * div + new Vector2(a.Pos.x, a.Pos.y);
+                    a.Move2(pt.x, pt.y);
+                }
+                else
+                {
+                    // 移动一格
+                    a.Pos = path[0];
+                    path.RemoveAt(0);
+                    t -= interval;
+                    a.Move2(a.Pos.x, a.Pos.y);
+                }
             };
         }
 
