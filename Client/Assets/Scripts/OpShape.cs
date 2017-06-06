@@ -41,7 +41,7 @@ public class OpShape : MonoBehaviour, IDragHandler, IEndDragHandler {
         {
             var x = xys[n * 2];
             var y = xys[n * 2 + 1];
-            ShapeBlocks[y * 4 + x].SetActive(true);
+            ShapeBlocks[y * 3 + x].SetActive(true);
         });
     }
 
@@ -53,14 +53,14 @@ public class OpShape : MonoBehaviour, IDragHandler, IEndDragHandler {
         Shapes = new int[nums][][];
         Utils.For(nums, (n) =>
         {
-            var changes = ShapesStr[n].Length / 4;
+            var changes = ShapesStr[n].Length / 3;
             Shapes[n] = new int[changes][];
             Utils.For(changes, (m) =>
             {
                 var xys = new List<int>();
-                Utils.For(4, 4, (y, x) =>
+                Utils.For(3, 3, (y, x) =>
                 {
-                    if (ShapesStr[n][m * 4 + y][x] == '*')
+                    if (ShapesStr[n][m * 3 + y][x] == '*')
                     {
                         xys.Add(x);
                         xys.Add(y);
@@ -89,126 +89,106 @@ public class OpShape : MonoBehaviour, IDragHandler, IEndDragHandler {
     {
         new string[]
         {
-            "    ",
-            " *  ",
-            "    ",
-            "    ",
+            "   ",
+            " * ",
+            "   ",
         },
 
         new string[]
         {
-            "    ",
-            "    ",
-            "****",
-            "    ",
+            "   ",
+            "***",
+            "   ",
 
-            " *  ",
-            " *  ",
-            " *  ",
-            " *  ",
+            " * ",
+            " * ",
+            " * ",
         },
 
         new string[]
         {
-            "    ",
-            " ** ",
-            " ** ",
-            "    ",
+            "***",
+            "* *",
+            "***",
         },
 
         new string[]
         {
-            "    ",
-            "**  ",
-            " ** ",
-            "    ",
+            "** ",
+            " * ",
+            " **",
 
-            "  * ",
-            " ** ",
-            " *  ",
-            "    ",
+            "  *",
+            "***",
+            "*  ",
         },
 
         new string[]
         {
-            "    ",
-            "  **",
-            " ** ",
-            "    ",
+            " **",
+            " * ",
+            "** ",
 
-            " *  ",
-            " ** ",
-            "  * ",
-            "    ",
+            "*  ",
+            "***",
+            "  *",
         },
 
         new string[]
         {
-            "    ",
-            "*   ",
-            "*** ",
-            "    ",
+            "*  ",
+            "*  ",
+            "***",
 
-            " ** ",
-            " *  ",
-            " *  ",
-            "    ",
+            "***",
+            "*  ",
+            "*  ",
 
-            "    ",
-            "*** ",
-            "  * ",
-            "    ",
+            "***",
+            "  *",
+            "  *",
 
-            "  * ",
-            "  * ",
-            " ** ",
-            "    ",
+            "  *",
+            "  *",
+            "***",
         },
 
         new string[]
         {
-            "    ",
-            "  * ",
-            "*** ",
-            "    ",
+            "  *",
+            "  *",
+            "***",
 
-            " *  ",
-            " *  ",
-            " ** ",
-            "    ",
+            "*  ",
+            "*  ",
+            "***",
 
-            "    ",
-            "*** ",
-            "*   ",
-            "    ",
+            "***",
+            "*  ",
+            "*  ",
 
-            " ** ",
-            "  * ",
-            "  * ",
-            "    ",
+            "***",
+            "  *",
+            "  *",
         },
 
         new string[]
         {
-            "    ",
-            " *  ",
-            "*** ",
-            "    ",
+            " * ",
+            " * ",
+            "***",
 
-            " *  ",
-            " ** ",
-            " *  ",
-            "    ",
+            "*  ",
+            "***",
+            "*  ",
 
-            "    ",
-            "*** ",
-            " *  ",
-            "    ",
+            "***",
+            " * ",
+            " * ",
 
-            "  * ",
-            " ** ",
-            "  * ",
-            "    ",
+            "  *",
+            "***",
+            "  *",
         }
     };
 

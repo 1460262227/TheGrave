@@ -46,6 +46,7 @@ public class Ground : MonoBehaviour
             if (selected == null)
                 return;
 
+            InvalidSelected = null;
             Utils.For(value.Length / 2, (n) =>
             {
                 var x = selected[n * 2];
@@ -54,6 +55,29 @@ public class Ground : MonoBehaviour
             });
         }
     } int[] selected = null;
+
+    public int[] InvalidSelected
+    {
+        set
+        {
+            ClearSelected();
+            invalidSelected = value;
+
+            if (invalidSelected == null)
+                return;
+
+            Selected = null;
+            Utils.For(value.Length / 2, (n) =>
+            {
+                var x = invalidSelected[n * 2];
+                var y = invalidSelected[n * 2 + 1];
+                if (x < 0 || x >= w || y < 0 || y >= h)
+                    return;
+
+                blocks[x, y].InvalidSelected = true;
+            });
+        }
+    } int[] invalidSelected = null;
 
     public bool FillSelected()
     {
@@ -109,7 +133,10 @@ public class Ground : MonoBehaviour
     void ClearSelected()
     {
         foreach (var b in blocks)
+        {
             b.Selected = false;
+            b.InvalidSelected = false;
+        }
     }
 
     public void ReCreateGound(int width, int height)

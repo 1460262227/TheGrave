@@ -6,6 +6,7 @@ public class Block : MonoBehaviour {
 
     public GameObject[] Layers = null;
     public GameObject SelectedLayer = null;
+    public GameObject InvalidSelectedLayer = null;
 
     public int Layer
     {
@@ -28,6 +29,16 @@ public class Block : MonoBehaviour {
         set
         {
             SelectedLayer.SetActive(value);
+            InvalidSelectedLayer.SetActive(false);
+        }
+    }
+
+    public bool InvalidSelected
+    {
+        set
+        {
+            SelectedLayer.SetActive(false);
+            InvalidSelectedLayer.SetActive(value);
         }
     }
 }

@@ -38,14 +38,14 @@ public class HandleClickOnBlock : MonoBehaviour, IPointerClickHandler {
             {
                 var x = xys[n * 2] + bx;
                 var y = xys[n * 2 + 1] + by;
-                xys[n * 2] = x;
-                xys[n * 2 + 1] = y;
+                xys[n * 2] = x - 1;
+                xys[n * 2 + 1] = y - 1;
             });
 
-            if (!Ground.Valid(xys))
-                return;
-
-            Ground.Selected = xys;
+            if (Ground.Valid(xys))
+                Ground.Selected = xys;
+            else
+                Ground.InvalidSelected = xys;
         };
 
         OpShape.OnEndDrag += () =>
