@@ -10,30 +10,41 @@ namespace Nova
         public static AStarPathFinder PathFinder = null;
         public static Ground Ground = null;
 
-        public static StateMachine CreateAI(string name, string aiType)
+        public static StateMachine CreateAI(this Actor a, string aiType)
         {
+            switch (aiType)
+            {
+                case "WalkOrAttack":
+                    return a.WalkOrAttack();
+            }
+
             return null;
         }
 
         public static Actor[] GetActorsInRange(this Actor a, int range)
         {
-            return null;
+            return new Actor[0];
         }
 
         public static void Move2(this Actor a, int x, int y)
         {
             a.Pos = new Pos(x, y);
-            a.transform.localPosition = Ground.ToWorldPos(0, 0);
+            a.transform.localPosition = Ground.ToWorldPos(x, y);
         }
 
         public static void MoveOnPath(this Actor a, List<Pos> path)
         {
-
+            a.MovePath = path;
         }
 
         public static void Attack(this Actor a, Actor target)
         {
 
+        }
+
+        public static StateMachine GetStateMachine(this Actor a)
+        {
+            return SMMgr.Get(a.ID);
         }
 
         public static List<Pos> FindPath(this Actor a, Pos dst)
@@ -59,10 +70,10 @@ namespace Nova
         }
 
         // 沿着给定路径移动
-        static Action<float> MakeMoveOnPath(this Actor a, List<Pos> path, float speed)
+        static Action<float> MakeMoveOnPath(this Actor a, float speed)
         {
-            var t = 0f; // 累计结余时间
             var interval = 1 / speed; // 每走一各的时间间隔
+            var t = interval; // 累计结余时间
 
             return (te) =>
             {
@@ -74,7 +85,8 @@ namespace Nova
                 t -= interval;
 
                 // 路径走完了
-                if (path.Count == 0)
+                var path = a.MovePath;
+                if (path == null || path.Count == 0)
                     return;
 
                 // 移动一格
@@ -103,9 +115,10 @@ namespace Nova
         }
 
         // 以一定时间间隔攻击目标
-        static Action<float> MakeAttack(this Actor a, Func<Actor> getTarget, float attackInterval)
+        static Action<float> MakeAttacking(this Actor a, Func<Actor> getTarget, float attackSpeed)
         {
-            float t = 0;
+            float attackInterval = 1 / attackSpeed;
+            float t = attackInterval;
 
             return (te) =>
             {
@@ -178,46 +191,65 @@ namespace Nova
         #region 创建常用的 AI
 
         // 获取角色当前状态机
-        public static StateMachine GetAIStateMachine(string name)
+        public static StateMachine GetAIStateMachine(this Actor a)
         {
-            return SMMgr.Get(name);
+            return SMMgr.Get(a.ID);
         }
 
         // 创建新的状态机
-        public static StateMachine CreateNewStateMachine(string name)
+        public static StateMachine CreateNewStateMachine(this Actor a)
         {
-            SMMgr.Del(name);
-            return SMMgr.Get(name);
+            SMMgr.Del(a.ID);
+            return SMMgr.Get(a.ID);
         }
 
         // 启动状态机
-        public static void StartAIAt(string name, string aiType)
+        public static void StartAI(this Actor a, string aiType)
         {
-            var sm = GetAIStateMachine(name);
+            var sm = a.GetAIStateMachine();
             if (sm == null && aiType != null)
-                sm = CreateAI(name, aiType);
+                sm = a.CreateAI(aiType);
 
             if (sm != null)
                 sm.StartAt();
         }
 
-        static StateMachine MakeSureSM(string name)
+        static StateMachine MakeSureSM(this Actor a)
         {
-            var sm = GetAIStateMachine(name);
+            var sm = a.GetAIStateMachine();
             if (sm == null)
-                sm = SMMgr.Create(name);
+                sm = SMMgr.Create(a.ID);
 
             return sm;
         }
 
         // 停止状态机
-        public static void StopAI(string name)
+        public static void StopAI(this Actor a)
         {
-            var sm = GetAIStateMachine(name);
+            var sm = a.GetAIStateMachine();
             if (sm != null)
                 sm.Destroy();
 
-            SMMgr.Del(name);
+            SMMgr.Del(a.ID);
+        }
+
+        // 有行动路径就行走，没有就寻找攻击目标，找到目标攻击。这个 AI 给玩家控制的角色用的
+        public static StateMachine WalkOrAttack(this Actor a)
+        {
+            var sm = a.MakeSureSM();
+
+            // 行走、搜索目标和攻击三个状态
+            Actor target = null;
+            sm.NewState("idle").AsDefault().Run(a.MakeFindingTarget((tar) => { target = tar; }));
+            sm.NewState("walking").Run(a.MakeMoveOnPath(5));
+            sm.NewState("attacking").Run(a.MakeAttacking(() => target, 2));
+
+            // 状态迁移
+            sm.Trans().From("idle|attacking").To("walking").When(() => a.MovePath != null && a.MovePath.Count > 0);
+            sm.Trans().From("attacking").To("idle").When(() => target == null || target.IsDead() || !a.InAttackRange(target));
+            sm.Trans().From("walking").To("idle").When(() => a.MovePath == null || a.MovePath.Count == 0);
+
+            return sm;
         }
 
         //// 在给定位置的附近游荡：中心位置，半径、行动时间间隔

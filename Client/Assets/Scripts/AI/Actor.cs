@@ -8,6 +8,8 @@ public class Actor : MonoBehaviour {
     public Pos Pos { get; set; }
     public int SightRange { get; set; }
     public int AttackRange { get; set; }
+    public string ID { get; set; }
+    public List<Pos> MovePath { get; set; }
 
     public int Hp
     {

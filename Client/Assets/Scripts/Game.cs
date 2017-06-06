@@ -21,6 +21,9 @@ public class Game : MonoBehaviour {
         Ground.ReCreateGound(w, h);
         Triggers.ReCreateTriggers(2, w, h);
         OpShape.GenNextShape();
+
+        Ground.Player.ID = "player";
+        Ground.Player.StartAI("WalkOrAttack");
     }
 
     void Init()

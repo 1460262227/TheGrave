@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Nova
 {
     // 状态机管理器，驱动管理所有状态机
-    public class StateMachineManager : MonoBehaviour
+    public class StateMachineManager
     {
         // 所有状态机
         Dictionary<string, StateMachine> sms = new Dictionary<string, StateMachine>();

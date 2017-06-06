@@ -25,8 +25,6 @@ public class HandleClickOnBlock : MonoBehaviour, IPointerClickHandler {
 
             Player.MoveOnPath(path);
         }
-
-        Debug.Log(Player.Pos.x + ", " + Player.Pos.y + " => " + bx + ", " + by);
     }
 
     private void Start()

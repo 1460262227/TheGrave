@@ -148,8 +148,6 @@ namespace Nova
                 if (t.TransitionCondition())
                 {
                     tToWork = t;
-
-                    Console.WriteLine("from " + t.FromState + " to " + t.ToState);
                     break;
                 }
             }
