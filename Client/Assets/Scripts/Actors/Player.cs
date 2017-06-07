@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TriggerDiamond : TriggerObj
-{
+public class Player : Actor {
+
+    public int Starts { get; set; }
 }

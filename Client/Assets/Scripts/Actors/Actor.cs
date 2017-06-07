@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Nova;
@@ -10,6 +11,8 @@ public class Actor : MonoBehaviour {
     public int AttackRange { get; set; }
     public string ID { get; set; }
     public List<Pos> MovePath { get; set; }
+
+    public static Action<Actor> DestroyActor = null;
 
     public int Hp
     {
@@ -37,4 +40,13 @@ public class Actor : MonoBehaviour {
         return Pos.Dist(tar.Pos) <= AttackRange;
     }
     
+    public virtual void StartAt(Pos pos)
+    {
+        Pos = pos;
+    }
+
+    public virtual void OnCollid(Actor a)
+    {
+
+    }
 }

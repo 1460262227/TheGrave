@@ -31,6 +31,9 @@ public class Game : MonoBehaviour {
         AIExt.Ground = Ground;
         AIExt.PathFinder = Ground.PathFinder;
         AIExt.SMMgr = SMMgr;
+        AIExt.GetActorAtPos = Ground.GetActorsAtPos;
+        AIExt.OnActorCollid += (fromA, toA) => { fromA.OnCollid(toA); toA.OnCollid(fromA); };
+        Actor.DestroyActor = Ground.DestroyActor;
     }
 	
 	// Update is called once per frame

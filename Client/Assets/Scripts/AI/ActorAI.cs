@@ -10,6 +10,8 @@ namespace Nova
         public static StateMachineManager SMMgr = null;
         public static AStarPathFinder PathFinder = null;
         public static Ground Ground = null;
+        public static Func<Pos, Actor[]> GetActorAtPos = null;
+        public static event Action<Actor, Actor> OnActorCollid = null;
 
         public static StateMachine CreateAI(this Actor a, string aiType)
         {
@@ -17,6 +19,8 @@ namespace Nova
             {
                 case "WalkOrAttack":
                     return a.WalkOrAttack();
+                case "StayAndCollid":
+                    return a.StayAndCollid();
             }
 
             return null;
@@ -222,7 +226,7 @@ namespace Nova
                 sm = a.CreateAI(aiType);
 
             if (sm != null)
-                sm.StartAt();
+                sm.StartAI();
         }
 
         static StateMachine MakeSureSM(this Actor a)
@@ -245,7 +249,7 @@ namespace Nova
         }
 
         // 有行动路径就行走，没有就寻找攻击目标，找到目标攻击。这个 AI 给玩家控制的角色用的
-        public static StateMachine WalkOrAttack(this Actor a)
+        static StateMachine WalkOrAttack(this Actor a)
         {
             var sm = a.MakeSureSM();
 
@@ -259,6 +263,23 @@ namespace Nova
             sm.Trans().From("idle|attacking").To("walking").When(() => a.MovePath != null && a.MovePath.Count > 0);
             sm.Trans().From("attacking").To("idle").When(() => target == null || target.IsDead() || !a.InAttackRange(target));
             sm.Trans().From("walking").To("idle").When(() => a.MovePath == null || a.MovePath.Count == 0);
+
+            return sm;
+        }
+
+        // 原地待机，并检查与其它 Actor 的碰撞情况
+        static StateMachine StayAndCollid(this Actor a)
+        {
+            var sm = a.MakeSureSM();
+            sm.NewState("idle").Run((te) =>
+            {
+                var actors = GetActorAtPos(a.Pos);
+                if (actors.Length == 0)
+                    return;
+
+                foreach (var toA in actors)
+                    OnActorCollid.SC(a, toA);
+            }).AsDefault();
 
             return sm;
         }

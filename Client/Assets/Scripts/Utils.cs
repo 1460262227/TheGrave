@@ -70,4 +70,10 @@ public static class Utils{
         else
             return v;
     }
+
+    public static string RandomName(string prefix = null)
+    {
+        var rn = "_" + DateTime.Now.Ticks + "_" + RandNext(10000, 99999);
+        return prefix == null ? rn : prefix + rn;
+    }
 }

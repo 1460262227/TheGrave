@@ -11,6 +11,7 @@ public class Ground : MonoBehaviour
     public Triggers Triggers = null;
     public Player Player = null;
 
+    List<Actor> actors = new List<Actor>();
     Block[,] blocks = null;
     List<Block> allocated = new List<Block>();
     int w;
@@ -19,6 +20,28 @@ public class Ground : MonoBehaviour
 
     public AStarPathFinder PathFinder { get { return pathFinder; } }
     AStarPathFinder pathFinder = new AStarPathFinder();
+
+    public Actor[] GetActorsAtPos(Pos pos)
+    {
+        var lst = new List<Actor>();
+        foreach (var a in actors)
+        {
+            if (a.Pos == pos)
+                lst.Add(a);
+        }
+
+        if (Player.Pos == pos)
+            lst.Add(Player);
+
+        return lst.ToArray();
+    }
+
+    public void DestroyActor(Actor a)
+    {
+        a.StopAI();
+        actors.Remove(a);
+        a.gameObject.SetActive(false);
+    }
 
     public bool ToBlockPos(float sx, float sy, out int bx, out int by)
     {

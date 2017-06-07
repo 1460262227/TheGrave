@@ -80,7 +80,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\AI\Actor.cs" />
+    <Compile Include="Assets\Scripts\Actors\Diamond.cs" />
+    <Compile Include="Assets\Scripts\Actors\Monster.cs" />
+    <Compile Include="Assets\Scripts\Actors\Actor.cs" />
     <Compile Include="Assets\Scripts\AI\ActorAI.cs" />
     <Compile Include="Assets\Scripts\AI\Pos.cs" />
     <Compile Include="Assets\Scripts\AI\State.cs" />
@@ -91,16 +93,15 @@
     <Compile Include="Assets\Scripts\AStar\PriorityQueue.cs" />
     <Compile Include="Assets\Scripts\AStar\SpatialAStar.cs" />
     <Compile Include="Assets\Scripts\Block.cs" />
-    <Compile Include="Assets\Scripts\TriggerDiamond.cs" />
     <Compile Include="Assets\Scripts\Game.cs" />
     <Compile Include="Assets\Scripts\Ground.cs" />
     <Compile Include="Assets\Scripts\HandleClickOnBlock.cs" />
-    <Compile Include="Assets\Scripts\TriggerMonster.cs" />
     <Compile Include="Assets\Scripts\OpShape.cs" />
-    <Compile Include="Assets\Scripts\Player.cs" />
+    <Compile Include="Assets\Scripts\Actors\Player.cs" />
     <Compile Include="Assets\Scripts\Triggers.cs" />
     <Compile Include="Assets\Scripts\Utils.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
 </Project>

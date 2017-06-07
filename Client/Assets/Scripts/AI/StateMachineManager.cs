@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Nova
 {
@@ -12,7 +13,7 @@ namespace Nova
 
         public void OnTimeElapsed(float te)
         {
-            foreach (var sm in sms.Values)
+            foreach (var sm in sms.Values.ToArray())
                 sm.Run(te);
         }
 

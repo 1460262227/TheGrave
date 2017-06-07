@@ -44,7 +44,7 @@ namespace Nova
         string curState = null;
 
         // 启动状态机，只能启动一次
-        public void StartAt()
+        public void StartAI()
         {
             Prepare();
             curState = StartState;
@@ -136,6 +136,9 @@ namespace Nova
         // 检查状态迁移
         void CheckTransition(float te)
         {
+            if (!trans.ContainsKey(curState))
+                return;
+
             // 要生效的迁移条件
             StateTransition tToWork = null;
 

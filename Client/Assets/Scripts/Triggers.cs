@@ -1,22 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class TriggerObj : MonoBehaviour
-{
-    public virtual void UncoverAt(int x, int y) { }
-}
+using Nova;
 
 public class Triggers : MonoBehaviour {
 
     public Ground Ground = null;
-    public TriggerDiamond Diamond = null;
+    public Diamond Diamond = null;
     public Monster Monster = null;
     
     int w;
     int h;
     int l;
-    TriggerObj[][,] triggers = null;
+    Actor[][,] triggers = null;
     List<GameObject> allocated = new List<GameObject>();
     public void ReCreateTriggers(int layers, int width, int height)
     {
@@ -26,30 +22,33 @@ public class Triggers : MonoBehaviour {
         h = height;
         l = layers;
 
-        triggers = new TriggerObj[l][,];
+        triggers = new Actor[l][,];
         Utils.For(layers, (n) =>
         {
-            triggers[n] = new TriggerObj[w, h];
+            triggers[n] = new Actor[w, h];
             Utils.For(w, h, (x, y) =>
             {
                 var t = GenRandomTrigger();
                 triggers[n][x, y] = t;
                 if (t != null)
-                    allocated.Add((t as MonoBehaviour).gameObject);
+                {
+                    t.transform.SetParent(transform, false);
+                    t.transform.localPosition = Ground.ToWorldPos(x, y);
+                    t.gameObject.SetActive(false);
+                    allocated.Add(t.gameObject);
+                } 
             });
         });
     }
 
-    public TriggerObj Uncover(int layer, int x, int y)
+    public Actor Uncover(int layer, int x, int y)
     {
         var t = triggers[layer][x, y];
         triggers[layer][x, y] = null;
         if (t != null)
         {
             t.gameObject.SetActive(true);
-            t.transform.SetParent(transform, false);
-            t.transform.localPosition = Ground.ToWorldPos(x, y);
-            t.UncoverAt(x, y);
+            t.StartAt(new Pos(x, y));
         }
 
         return t;
@@ -63,13 +62,17 @@ public class Triggers : MonoBehaviour {
         allocated.Clear();
     }
 
-    TriggerObj GenRandomTrigger()
+    Actor GenRandomTrigger()
     {
+        Actor a = null;
         if (Utils.Hit(0.05f))
-            return Instantiate(Diamond);
+            a = Instantiate(Diamond) as Actor;
         else if (Utils.Hit(0.1f))
-            return Instantiate(Monster);
-        else
-            return null;
+            a = Instantiate(Monster) as Actor;
+
+        if (a != null)
+            a.ID = Utils.RandomName("Actor");
+
+        return a;
     }
 }
