@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Diamond : MonoBehaviour, ITrigger
+public class TriggerMonster : TriggerObj
 {
-    public void UncoverAt(int x, int y)
+    public override void UncoverAt(int x, int y)
     {
     }
 }

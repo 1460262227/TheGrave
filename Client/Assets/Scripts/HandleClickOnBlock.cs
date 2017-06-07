@@ -52,6 +52,11 @@ public class HandleClickOnBlock : MonoBehaviour, IPointerClickHandler {
         {
             if (Ground.FillSelected())
                 OpShape.GenNextShape();
+            else
+            {
+                Ground.Selected = null;
+                Ground.InvalidSelected = null;
+            }
         };
     }
 }

@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ITrigger
+public class TriggerObj : MonoBehaviour
 {
-    void UncoverAt(int x, int y);
+    public virtual void UncoverAt(int x, int y) { }
 }
 
 public class Triggers : MonoBehaviour {
 
-    public Diamond Diamond = null;
+    public Ground Ground = null;
+    public TriggerDiamond Diamond = null;
     public Monster Monster = null;
     
     int w;
     int h;
     int l;
-    ITrigger[][,] triggers = null;
+    TriggerObj[][,] triggers = null;
     List<GameObject> allocated = new List<GameObject>();
     public void ReCreateTriggers(int layers, int width, int height)
     {
@@ -25,10 +26,10 @@ public class Triggers : MonoBehaviour {
         h = height;
         l = layers;
 
-        triggers = new ITrigger[l][,];
+        triggers = new TriggerObj[l][,];
         Utils.For(layers, (n) =>
         {
-            triggers[n] = new ITrigger[w, h];
+            triggers[n] = new TriggerObj[w, h];
             Utils.For(w, h, (x, y) =>
             {
                 var t = GenRandomTrigger();
@@ -39,12 +40,18 @@ public class Triggers : MonoBehaviour {
         });
     }
 
-    public ITrigger Uncover(int layer, int x, int y)
+    public TriggerObj Uncover(int layer, int x, int y)
     {
         var t = triggers[layer][x, y];
         triggers[layer][x, y] = null;
         if (t != null)
+        {
+            t.gameObject.SetActive(true);
+            t.transform.SetParent(transform, false);
+            t.transform.localPosition = Ground.ToWorldPos(x, y);
             t.UncoverAt(x, y);
+        }
+
         return t;
     }
 
@@ -56,7 +63,7 @@ public class Triggers : MonoBehaviour {
         allocated.Clear();
     }
 
-    ITrigger GenRandomTrigger()
+    TriggerObj GenRandomTrigger()
     {
         if (Utils.Hit(0.05f))
             return Instantiate(Diamond);
