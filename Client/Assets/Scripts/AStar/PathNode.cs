@@ -57,11 +57,12 @@ namespace AStar
     // A* 寻路器
     public class AStarPathFinder : IConnectionCheck
     {
+        public bool KeepInLayer = false;
         public bool Connected(int fx, int fy, int tx, int ty)
         {
             int h1 = nodes[fx, fy].Height;
             int h2 = nodes[tx, ty].Height;
-            return h1 >= h2;
+            return KeepInLayer ? h1 == h2 : h1 >= h2;
         }
 
         AStarSolver<PathNode2D> s = null;
@@ -85,6 +86,10 @@ namespace AStar
         // 搜索路径，结果以 [x1, y1, x2, y2, ...] 的形式返回
         public int[] FindPath(int fx, int fy, int ex, int ey)
         {
+            if (fx < 0 || fx >= nodes.GetLength(0) || fy < 0 || fy >= nodes.GetLength(1)
+                || ex < 0 || ex >= nodes.GetLength(0) || ey < 0 || ey >= nodes.GetLength(1))
+                return new int[0];
+
             LinkedList<PathNode2D> path = s.Search(fx, fy, ex, ey, this);
             if (path == null || path.Count == 0)
                 return new int[0];

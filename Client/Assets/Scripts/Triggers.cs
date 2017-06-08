@@ -66,9 +66,16 @@ public class Triggers : MonoBehaviour {
     {
         Actor a = null;
         if (Utils.Hit(0.05f))
+        {
             a = Instantiate(Diamond) as Actor;
+        }
         else if (Utils.Hit(0.1f))
+        {
             a = Instantiate(Monster) as Actor;
+            a.SightRange = 3;
+            a.AttackRange = 1;
+            a.Hp = 3;
+        }
 
         if (a != null)
             a.ID = Utils.RandomName("Actor");

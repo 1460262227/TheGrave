@@ -11,8 +11,14 @@ public class Actor : MonoBehaviour {
     public int AttackRange { get; set; }
     public string ID { get; set; }
     public List<Pos> MovePath { get; set; }
+    public virtual bool KeepInLayer { get { return false; } }
 
     public static Action<Actor> DestroyActor = null;
+
+    public virtual bool IsEnemy(Actor target)
+    {
+        return false;
+    }
 
     public int Hp
     {

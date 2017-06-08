@@ -5,25 +5,26 @@ using UnityEngine;
 
 public static class Utils{
     
-    public static void For(int start, int end, Action<int> func)
+    public static void For(int start, int end, Action<int> func, Func<bool> exitCondition = null)
     {
-        for (int i = start; i < end; i++)
+        var d = end > start ? 1 : -1;
+        for (int i = start; (d > 0 ? (i < end) : (i > end)) && (exitCondition == null || !exitCondition()); i += d)
             func(i);
     }
 
-    public static void For(int end, Action<int> func)
+    public static void For(int end, Action<int> func, Func<bool> exitCondition = null)
     {
-        For(0, end, func);
+        For(0, end, func, exitCondition);
     }
 
-    public static void For(int start1, int end1, int start2, int end2, Action<int, int> func)
+    public static void For(int start1, int end1, int start2, int end2, Action<int, int> func, Func<bool> exitCondition = null)
     {
-        For(start1, end1, (a) => { For(start2, end2, (b) => { func(a, b); }); });
+        For(start1, end1, (a) => { For(start2, end2, (b) => { func(a, b); }, exitCondition); }, exitCondition);
     }
 
-    public static void For(int end1, int end2, Action<int, int> func)
+    public static void For(int end1, int end2, Action<int, int> func, Func<bool> exitCondition = null)
     {
-        For(0, end1, 0, end2, func);
+        For(0, end1, 0, end2, func, exitCondition);
     }
 
     public static void SC(this Action call)

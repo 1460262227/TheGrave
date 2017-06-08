@@ -34,6 +34,10 @@ public class Game : MonoBehaviour {
         AIExt.GetActorAtPos = Ground.GetActorsAtPos;
         AIExt.OnActorCollid += (fromA, toA) => { fromA.OnCollid(toA); toA.OnCollid(fromA); };
         Actor.DestroyActor = Ground.DestroyActor;
+
+        Ground.Player.SightRange = 3;
+        Ground.Player.AttackRange = 3;
+        Ground.Player.Hp = 10;
     }
 	
 	// Update is called once per frame

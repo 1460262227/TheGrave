@@ -192,4 +192,9 @@ public class Ground : MonoBehaviour
 
         allocated.Clear();
     }
+
+    public int GetLayerAt(int x, int y)
+    {
+        return x >= 0 && x < w && y >= 0 && y < h ? blocks[x, y].Layer : -1;
+    }
 }

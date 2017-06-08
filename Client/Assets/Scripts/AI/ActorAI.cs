@@ -21,6 +21,8 @@ namespace Nova
                     return a.WalkOrAttack();
                 case "StayAndCollid":
                     return a.StayAndCollid();
+                case "PatrolInLayer":
+                    return a.PatrolInLayer();
             }
 
             return null;
@@ -28,7 +30,13 @@ namespace Nova
 
         public static Actor[] GetActorsInRange(this Actor a, int range)
         {
-            return new Actor[0];
+            var actors = new List<Actor>();
+            Utils.For(-range, range, -range, range, (dx, dy) =>
+            {
+                actors.AddRange(Ground.GetActorsAtPos(a.Pos + new Pos(dx, dy)));
+            });
+
+            return actors.ToArray();
         }
 
         public static void Move2(this Actor a, float fx, float fy)
@@ -57,6 +65,7 @@ namespace Nova
         public static List<Pos> FindPath(this Actor a, Pos dst)
         {
             var path = new List<Pos>();
+            PathFinder.KeepInLayer = a.KeepInLayer;
             var pts = PathFinder.FindPath(a.Pos.x, a.Pos.y, dst.x, dst.y);
             Utils.For(pts.Length / 2, (n) =>
             {
@@ -77,10 +86,11 @@ namespace Nova
         }
 
         // 沿着给定路径移动
-        static Action<float> MakeMoveOnPath(this Actor a, float speed)
+        static Action<float> MakeMoveOnPath(this Actor a, float speed, Action onMoving = null)
         {
             var interval = 1 / speed; // 每走一各的时间间隔
             var t = 0f; // 累计结余时间
+            a.MovePath = null;
 
             return (te) =>
             {
@@ -107,8 +117,22 @@ namespace Nova
                     path.RemoveAt(0);
                     t -= interval;
                     a.Move2(a.Pos.x, a.Pos.y);
+                    onMoving.SC();
                 }
             };
+        }
+
+        static Actor FindTarget(this Actor a)
+        {
+            var actors = a.GetActorsInRange(a.SightRange);
+            foreach (var tar in actors)
+            {
+                // 检查攻击距离
+                if (tar != null && !tar.IsDead() && a != tar && a.IsEnemy(tar))
+                    return tar;
+            }
+
+            return null;
         }
 
         // 搜索攻击目标
@@ -116,16 +140,9 @@ namespace Nova
         {
             return (te) =>
             {
-                var actors = a.GetActorsInRange(a.SightRange);
-                foreach (var tar in actors)
-                {
-                    // 检查攻击距离
-                    if (tar != null)
-                    {
-                        cbTarget(tar);
-                        return;
-                    }
-                }
+                var tar = a.FindTarget();
+                if (tar != null)
+                    cbTarget(tar);
             };
         }
 
@@ -164,6 +181,7 @@ namespace Nova
         {
             var t = 0f; // 累计结余时间
             var interval = 1 / speed; // 每走一各的时间间隔
+            a.MovePath = null;
 
             return (te) =>
             {
@@ -280,6 +298,51 @@ namespace Nova
                 foreach (var toA in actors)
                     OnActorCollid.SC(a, toA);
             }).AsDefault();
+
+            return sm;
+        }
+
+        // 同层巡逻
+        static StateMachine PatrolInLayer(this Actor a)
+        {
+            var sm = a.MakeSureSM();
+
+            // 原地搜索目标、巡逻到指定地点、追击目标、攻击目标三种状态
+            Actor target = null;
+            var chasingFrom = new Pos(0, 0);
+            sm.NewState("findingTarget").Run(a.MakeFindingTarget((tar) => { target = tar; })).AsDefault();
+            Func<bool> exitLoop = () => a.MovePath != null && a.MovePath.Count > 0;
+            sm.NewState("patrol2Pos").Run(a.MakeMoveOnPath(2, () => { target = a.FindTarget(); })).OnRunIn(() =>
+            {
+                Utils.For(5, 1, (r) =>
+                {
+                    Utils.For(-r, r, (i) =>
+                    {
+                        var dps = new Pos[] { new Pos(i, -r), new Pos(i, r), new Pos(-r, i), new Pos(r, i) };
+                        foreach (var dp in dps)
+                        {
+                            var d = a.Pos + dp;
+                            var path = a.FindPath(d);
+                            if (path != null && path.Count > 0)
+                            {
+                                a.MovePath = path;
+                                break;
+                            }
+                        }
+                    }, exitLoop);
+                }, exitLoop);
+            });
+            sm.NewState("chasing").Run(a.MakeChasing(() => target, 3));
+            sm.NewState("attacking").Run(a.MakeAttacking(() => target, 1));
+            
+            // 状态切换
+            sm.Trans().From("findingTarget").To("patrol2Pos").Wait4Sec(1);
+            sm.Trans().From("findingTarget|patrol2Pos").To("chasing").When(() => target != null && !target.IsDead());
+            Func<bool> chasingTooFar = () => chasingFrom.Dist(a.Pos) > 5;
+            sm.Trans().From("chasing").To("findingTarget").When(() => target == null || target.IsDead() || !a.InSightRange(target) || chasingTooFar());
+            sm.Trans().From("patrol2Pos").To("findingTarget").When(() => a.MovePath == null || a.MovePath.Count == 0);
+            sm.Trans().From("chasing").To("attacking").When(() => a.InAttackRange(target));
+            sm.Trans().From("attacking").To("chasing").When(() => target != null && !a.InAttackRange(target));
 
             return sm;
         }
