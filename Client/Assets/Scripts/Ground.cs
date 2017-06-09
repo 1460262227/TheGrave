@@ -113,7 +113,9 @@ public class Ground : MonoBehaviour
             var y = selected[n * 2 + 1];
             blocks[x, y].Layer++;
 
-            Triggers.Uncover(blocks[x, y].Layer - 1, x, y);
+            var a = Triggers.Uncover(blocks[x, y].Layer - 1, x, y);
+            if (a != null)
+                actors.Add(a);
             pathFinder.SetHeight(x, y, -blocks[x, y].Layer);
         });
 
