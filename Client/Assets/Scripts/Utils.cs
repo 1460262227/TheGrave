@@ -77,4 +77,44 @@ public static class Utils{
         var rn = "_" + DateTime.Now.Ticks + "_" + RandNext(10000, 99999);
         return prefix == null ? rn : prefix + rn;
     }
+
+    public static List<int> Range(int start, int end)
+    {
+        var lst = new List<int>();
+        For(start, end, (i) => { lst.Add(i); });
+        return lst;
+    }
+
+    public static List<int> Range(int end)
+    {
+        return Range(0, end);
+    }
+
+    public static List<T> Disorder<T>(this List<T> lst)
+    {
+        var cnt = lst.Count;
+        For(cnt, (i) =>
+        {
+            var rn = RandNext(0, cnt);
+            var tmp = lst[i];
+            lst[i] = lst[rn];
+            lst[rn] = tmp;
+        });
+
+        return lst;
+    }
+
+    public static T[] Disorder<T>(this T[] arr)
+    {
+        var cnt = arr.Length;
+        For(cnt, (i) =>
+        {
+            var rn = RandNext(0, cnt);
+            var tmp = arr[i];
+            arr[i] = arr[rn];
+            arr[rn] = tmp;
+        });
+
+        return arr;
+    }
 }

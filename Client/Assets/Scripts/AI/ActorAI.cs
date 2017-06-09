@@ -54,7 +54,8 @@ namespace Nova
 
         public static void Attack(this Actor a, Actor target)
         {
-
+            if (!target.IsDead())
+                target.Hp--;
         }
 
         public static StateMachine GetStateMachine(this Actor a)
@@ -187,20 +188,33 @@ namespace Nova
             {
                 // 行动间隔时间
                 t += te;
-                if (t < interval)
+
+                // 路径走完了
+                var tar = getTarget();
+                if (tar == null)
                     return;
 
-                t -= interval;
-
-                // 寻路
-                var target = getTarget();
-                var path = a.FindPath(target.Pos);
-                if (path.Count < 2) // 第一格是自己现在位置
+                var path = a.FindPath(tar.Pos);
+                if (path == null || path.Count < 2) // 第一个节点是现在所在位置
                     return;
 
-                // 移动一格
-                var nextPos = path[1];
-                a.Move2(nextPos.x, nextPos.y);
+                path.RemoveAt(0);
+                var div = t / interval;
+                if (div < 1)
+                {
+                    var dp = path[0] - a.Pos;
+                    var v2 = new Vector2(dp.x, dp.y);
+                    var pt = v2 * div + new Vector2(a.Pos.x, a.Pos.y);
+                    a.Move2(pt.x, pt.y);
+                }
+                else
+                {
+                    // 移动一格
+                    a.Pos = path[0];
+                    path.RemoveAt(0);
+                    t -= interval;
+                    a.Move2(a.Pos.x, a.Pos.y);
+                }
             };
         }
 
@@ -309,16 +323,17 @@ namespace Nova
 
             // 原地搜索目标、巡逻到指定地点、追击目标、攻击目标三种状态
             Actor target = null;
-            var chasingFrom = new Pos(0, 0);
             sm.NewState("findingTarget").Run(a.MakeFindingTarget((tar) => { target = tar; })).AsDefault();
             Func<bool> exitLoop = () => a.MovePath != null && a.MovePath.Count > 0;
             sm.NewState("patrol2Pos").Run(a.MakeMoveOnPath(2, () => { target = a.FindTarget(); })).OnRunIn(() =>
             {
-                Utils.For(5, 1, (r) =>
+                var findRs = Utils.Range(1, 5).Disorder();
+                foreach (var r in findRs)
                 {
                     Utils.For(-r, r, (i) =>
                     {
                         var dps = new Pos[] { new Pos(i, -r), new Pos(i, r), new Pos(-r, i), new Pos(r, i) };
+                        dps.Disorder();
                         foreach (var dp in dps)
                         {
                             var d = a.Pos + dp;
@@ -330,97 +345,26 @@ namespace Nova
                             }
                         }
                     }, exitLoop);
-                }, exitLoop);
+
+                    if (exitLoop())
+                        break;
+                }
             });
             sm.NewState("chasing").Run(a.MakeChasing(() => target, 3));
             sm.NewState("attacking").Run(a.MakeAttacking(() => target, 1));
-            
+
             // 状态切换
             sm.Trans().From("findingTarget").To("patrol2Pos").Wait4Sec(1);
-            sm.Trans().From("findingTarget|patrol2Pos").To("chasing").When(() => target != null && !target.IsDead());
-            Func<bool> chasingTooFar = () => chasingFrom.Dist(a.Pos) > 5;
-            sm.Trans().From("chasing").To("findingTarget").When(() => target == null || target.IsDead() || !a.InSightRange(target) || chasingTooFar());
+            sm.Trans().From("findingTarget|patrol2Pos").To("chasing").When(() => target != null && !target.IsDead() && a.InSightRange(target));
+            sm.Trans().From("chasing").To("findingTarget").When(() => target == null || target.IsDead() || !a.InSightRange(target));
             sm.Trans().From("patrol2Pos").To("findingTarget").When(() => a.MovePath == null || a.MovePath.Count == 0);
             sm.Trans().From("chasing").To("attacking").When(() => a.InAttackRange(target));
             sm.Trans().From("attacking").To("chasing").When(() => target != null && !a.InAttackRange(target));
+            sm.Trans().From("attacking|chasing").To("findingTarget").When(() => target != null && target.IsDead());
 
+            // sm.DebugInfo = Debug.Log;
             return sm;
         }
-
-        //// 在给定位置的附近游荡：中心位置，半径、行动时间间隔
-        //public static StateMachine WalkAround(this Actor a, int r, float idleTime)
-        //{
-        //    var sm = a.MakeSureSM();
-        //    var center = a.Pos;
-
-        //    // 行走和待命两个状态
-        //    var path = new List<Pos>();
-        //    sm.NewState("idle").AsDefault();
-        //    sm.NewState("walking").OnRunIn(() =>
-        //    {
-        //        var dx = Utils.RandomNext(-r, r);
-        //        var dy = Utils.RandomNext(-r, r);
-        //        var dst = center + new Pos(dx, dy);
-        //        path.AddRange(a.FindPath(dst));
-        //    }).Run(a.MakeMoveOnPath(path, 1));
-
-        //    // 状态迁移
-        //    sm.Trans().From("idle").To("walking").Wait4Sec(idleTime); // 待命一定时间后开始走动
-        //    sm.Trans().From("walking").To("idle").When(() => path.Count == 0); // 走到目的地后开始待机
-
-        //    return sm;
-        //}
-
-        //// 原地攻击
-        //public static StateMachine HoldAndAttack(this Actor a)
-        //{
-        //    var sm = a.MakeSureSM();
-
-        //    // 搜寻目标和攻击两个状态
-        //    Actor target = null;
-        //    sm.NewState("findingTarget").Run(a.MakeFindingTarget((targetActor) => { target = targetActor; })).AsDefault();
-        //    sm.NewState("attacking").Run(a.MakeAttack(() => target, 1));
-
-        //    // 状态迁移
-        //    sm.Trans().From("findingTarget").To("attacking").When(() => target != null); // 有目标就攻击
-        //    sm.Trans().From("attacking").To("findingTarget").When(() => target != null && target.IsDead() || !a.IsInRange(target, 1)); // 目标死亡或超出范围就重新找目标
-
-        //    return sm;
-        //}
-
-        //// 巡逻
-        //public static StateMachine Patrol(this Actor a, int r, float idleTime)
-        //{
-        //    var sm = a.MakeSureSM();
-        //    var center = a.Pos;
-
-        //    // 行走和待命两个状态
-        //    Actor target = null;
-        //    var path = new List<Pos>();
-        //    sm.NewState("idle").AsDefault();
-        //    sm.NewState("walking").OnRunIn(() =>
-        //    {
-        //        var dx = Utils.RandomNext(-r, r);
-        //        var dy = Utils.RandomNext(-r, r);
-        //        var dst = center + new Pos(dx, dy);
-        //        path.AddRange(a.FindPath(dst));
-        //    }).Run(a.MakeMoveOnPath(path, 1, (tar) => { target = tar; }));
-        //    sm.NewState("chasing").Run(a.MakeChasing(() => target, 1));
-        //    sm.NewState("attacking").Run(a.MakeAttack(() => target, 1));
-
-        //    // 状态迁移
-        //    sm.Trans().From("idle").To("walking").Wait4Sec(idleTime); // 待命一定时间后开始游荡
-        //    sm.Trans().From("walking").To("idle").When(() => path.Count == 0); // 游荡到目的地后开始待命
-
-        //    sm.Trans().From("walking").To("chasing").When(() => target != null); // 游荡过程中有目标就追赶
-        //    sm.Trans().From("chasing").To("attacking").When(() => a.IsInRange(target, 1)); // 追到就攻击
-        //    sm.Trans().From("attacking").To("chasing").When(() => !a.IsInRange(target, 1)); // 目标逃出攻击范围就继续追
-
-        //    // 目标死亡或跑太远就回去
-        //    sm.Trans().From("chasing|attacking").To("walking").When(() => target.IsDead() || a.Pos.Distance(center) >= 5);
-
-        //    return sm;
-        //}
 
         #endregion
     }

@@ -15,12 +15,14 @@ public class Actor : MonoBehaviour {
 
     public static Action<Actor> DestroyActor = null;
 
+    public Action<string> DebugInfo = null;
+
     public virtual bool IsEnemy(Actor target)
     {
         return false;
     }
 
-    public int Hp
+    public virtual int Hp
     {
         get { return hp; }
         set
@@ -28,6 +30,8 @@ public class Actor : MonoBehaviour {
             hp = value;
             if (hp < 0)
                 hp = 0;
+
+            DebugInfo.SC(this.GetHashCode() + " hp => " + hp);
         }
     } int hp = 0;
 

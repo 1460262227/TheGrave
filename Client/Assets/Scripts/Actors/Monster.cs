@@ -17,4 +17,19 @@ public class Monster : Actor
     {
         return target is Player;
     }
+
+    public override int Hp
+    {
+        get
+        {
+            return base.Hp;
+        }
+
+        set
+        {
+            base.Hp = value;
+            if (IsDead())
+                gameObject.SetActive(false);
+        }
+    }
 }

@@ -23,7 +23,8 @@ public class HandleClickOnBlock : MonoBehaviour, IPointerClickHandler {
             if (path.Count == 0)
                 return;
 
-            Player.MoveOnPath(path);
+            if (!Player.IsDead())
+                Player.MoveOnPath(path);
         }
     }
 

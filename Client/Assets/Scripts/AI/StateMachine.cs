@@ -12,6 +12,8 @@ namespace Nova
         Dictionary<string, State> states = new Dictionary<string, State>();
         List<StateTransition> allTrans = new List<StateTransition>();
 
+        public Action<string> DebugInfo = null;
+
         // 迁移集
         Dictionary<string, List<StateTransition>> trans = new Dictionary<string, List<StateTransition>>();
 
@@ -49,6 +51,8 @@ namespace Nova
             Prepare();
             curState = StartState;
             running = true;
+
+            DebugInfo.SC(this.GetHashCode() + " starts at: " + curState);
         }
 
         // 销毁状态机，不能再次启动
@@ -57,6 +61,8 @@ namespace Nova
             running = false;
             allTrans.Clear();
             curState = null;
+
+            DebugInfo.SC(this.GetHashCode() + " destroy");
         }
 
         // prepare all transitions
@@ -113,11 +119,13 @@ namespace Nova
         public void Pause()
         {
             running = false;
+            DebugInfo.SC(this.GetHashCode() + " paused");
         }
 
         public void Resume()
         {
             running = true;
+            DebugInfo.SC(this.GetHashCode() + " resume");
         }
 
         public void Run(float te)
@@ -158,6 +166,8 @@ namespace Nova
             // 没有满足条件的就算了
             if (tToWork == null)
                 return;
+
+            DebugInfo.SC(this.GetHashCode() + " change state from: " + tToWork.FromState + " to: " + tToWork.ToState);
 
             // 执行迁移操作
 
