@@ -17,7 +17,7 @@ public class Diamond : Actor
             return;
 
         var p = a as Player;
-        p.Starts++;
+        p.Stars++;
 
         DestroyActor(this);
     }

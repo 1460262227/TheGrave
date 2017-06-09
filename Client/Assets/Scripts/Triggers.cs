@@ -8,6 +8,7 @@ public class Triggers : MonoBehaviour {
     public Ground Ground = null;
     public Diamond Diamond = null;
     public Monster Monster = null;
+    public Player Player = null;
     
     int w;
     int h;
@@ -23,6 +24,7 @@ public class Triggers : MonoBehaviour {
         l = layers;
 
         triggers = new Actor[l][,];
+        var stars = 0;
         Utils.For(layers, (n) =>
         {
             triggers[n] = new Actor[w, h];
@@ -36,9 +38,14 @@ public class Triggers : MonoBehaviour {
                     t.transform.localPosition = Ground.ToWorldPos(x, y);
                     t.gameObject.SetActive(false);
                     allocated.Add(t.gameObject);
-                } 
+                }
+
+                if (t is Diamond)
+                    stars++;
             });
         });
+
+        Player.Stars2Find = stars;
     }
 
     public Actor Uncover(int layer, int x, int y)

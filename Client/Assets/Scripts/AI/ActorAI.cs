@@ -297,7 +297,7 @@ namespace Nova
             sm.Trans().From("walking").To("idle").When(() => a.MovePath == null || a.MovePath.Count == 0);
             sm.Trans().From("idle").To("attacking").When(() => target != null && !target.IsDead() && a.InAttackRange(target));
 
-            sm.DebugInfo = Debug.LogWarning;
+            // sm.DebugInfo = Debug.LogWarning;
             return sm;
         }
 

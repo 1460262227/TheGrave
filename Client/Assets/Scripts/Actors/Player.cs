@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Player : Actor {
 
-    public int Starts { get; set; }
+    public int Stars { get; set; }
+
+    public int Stars2Find { get; set; }
 
     public override bool IsEnemy(Actor target)
     {
