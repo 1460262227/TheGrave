@@ -12,6 +12,7 @@ namespace Nova
         public static Ground Ground = null;
         public static Func<Pos, Actor[]> GetActorAtPos = null;
         public static event Action<Actor, Actor> OnActorCollid = null;
+        public static BloodyNum BloodyNum = null;
 
         public static StateMachine CreateAI(this Actor a, string aiType)
         {
@@ -55,7 +56,10 @@ namespace Nova
         public static void Attack(this Actor a, Actor target)
         {
             if (!target.IsDead())
+            {
                 target.Hp--;
+                BloodyNum.PlayNumAt(-1, target.Pos.x, target.Pos.y);
+            }
         }
 
         public static StateMachine GetStateMachine(this Actor a)
@@ -289,7 +293,7 @@ namespace Nova
             Actor target = null;
             sm.NewState("idle").AsDefault().Run(a.MakeFindingTarget((tar) => { target = tar; }));
             sm.NewState("walking").Run(a.MakeMoveOnPath(5));
-            sm.NewState("attacking").Run(a.MakeAttacking(() => target, 2));
+            sm.NewState("attacking").Run(a.MakeAttacking(() => target, 1));
 
             // 状态迁移
             sm.Trans().From("idle|attacking").To("walking").When(() => a.MovePath != null && a.MovePath.Count > 0);

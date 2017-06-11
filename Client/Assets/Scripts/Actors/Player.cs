@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Nova;
 
 public class Player : Actor {
 
@@ -28,6 +29,8 @@ public class Player : Actor {
                 var rs = GetComponentsInChildren<SpriteRenderer>();
                 foreach (var r in rs)
                     r.color = new Color(r.color.r, r.color.g, r.color.b, 0.5f);
+
+                this.StopAI();
             }
         }
     }

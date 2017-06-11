@@ -30,8 +30,6 @@ public class Actor : MonoBehaviour {
             hp = value;
             if (hp < 0)
                 hp = 0;
-
-            DebugInfo.SC(this.GetHashCode() + " hp => " + hp);
         }
     } int hp = 0;
 

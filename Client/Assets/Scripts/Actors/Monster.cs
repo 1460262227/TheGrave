@@ -29,7 +29,10 @@ public class Monster : Actor
         {
             base.Hp = value;
             if (IsDead())
+            {
                 gameObject.SetActive(false);
+                this.StopAI();
+            }
         }
     }
 }

@@ -9,6 +9,8 @@ public class Game : MonoBehaviour {
     public Ground Ground = null;
     public OpShape OpShape = null;
     public Triggers Triggers = null;
+    public BloodyNum BloodyNum = null;
+
     StateMachineManager SMMgr = new StateMachineManager();
 
     // Use this for initialization
@@ -33,6 +35,7 @@ public class Game : MonoBehaviour {
         AIExt.SMMgr = SMMgr;
         AIExt.GetActorAtPos = Ground.GetActorsAtPos;
         AIExt.OnActorCollid += (fromA, toA) => { fromA.OnCollid(toA); toA.OnCollid(fromA); };
+        AIExt.BloodyNum = BloodyNum;
         Actor.DestroyActor = Ground.DestroyActor;
 
         var p = Ground.Player;
